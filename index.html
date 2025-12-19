@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Air Pollution Data Analysis (2018–2022) — Slides</title>
+
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel2: rgba(255, 255, 255, 0.1);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.68);
+        --accent: #36d6c7;
+        --accent2: #5aa7ff;
+        --warn: #ffcc66;
+        --good: #77f0a7;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        --radius: 18px;
+        --radius2: 12px;
+        --maxw: 1200px;
+        --pad: clamp(18px, 3vw, 34px);
+        --h1: clamp(34px, 4vw, 54px);
+        --h2: clamp(22px, 2.6vw, 34px);
+        --h3: clamp(16px, 2vw, 22px);
+        --p: clamp(14px, 1.3vw, 18px);
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+        /* Use same background for body + slide so export images include the background */
+        --deckbg: radial-gradient(
+            1200px 600px at 10% 15%,
+            rgba(90, 167, 255, 0.28),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 600px at 70% 25%,
+            rgba(54, 214, 199, 0.22),
+            transparent 55%
+          ),
+          radial-gradient(
+            900px 600px at 50% 100%,
+            rgba(255, 204, 102, 0.1),
+            transparent 60%
+          ),
+          linear-gradient(180deg, #080d18 0%, #070b14 50%, #060a12 100%);
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background: var(--deckbg);
+        overflow: hidden;
+      }
+
+      /* Deck scroll-snap */
+      .deck {
+        height: 100vh;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+      }
+
+      .slide {
+        position: relative;
+        min-height: 100vh;
+        scroll-snap-align: start;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--pad);
+        background: var(--deckbg); /* important for exporting */
+      }
+
+      .wrap {
+        width: min(var(--maxw), 100%);
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        position: relative;
+        backdrop-filter: blur(10px);
+      }
+
+      .topbar {
+        height: 10px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+      }
+
+      .content {
+        padding: clamp(18px, 3.2vw, 40px);
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: clamp(14px, 2vw, 28px);
+      }
+
+      .onecol .content {
+        grid-template-columns: 1fr;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 10px 0;
+        letter-spacing: 0.2px;
+      }
+      h1 {
+        font-size: var(--h1);
+        line-height: 1.05;
+      }
+      h2 {
+        font-size: var(--h2);
+        line-height: 1.15;
+      }
+      h3 {
+        font-size: var(--h3);
+        line-height: 1.25;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      p,
+      li {
+        font-size: var(--p);
+        line-height: 1.5;
+        color: var(--text);
+      }
+      p {
+        margin: 10px 0 0 0;
+        color: rgba(255, 255, 255, 0.86);
+      }
+
+      .kicker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-weight: 650;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 99px;
+        background: linear-gradient(180deg, var(--accent), var(--accent2));
+        box-shadow: 0 0 0 4px rgba(54, 214, 199, 0.12);
+      }
+
+      .card {
+        background: var(--panel2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius2);
+        padding: 16px;
+      }
+
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .meta {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(54, 214, 199, 0.12);
+        border: 1px solid rgba(54, 214, 199, 0.25);
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 13px;
+        font-weight: 650;
+        width: fit-content;
+      }
+
+      .twoTone {
+        background: linear-gradient(
+          135deg,
+          rgba(54, 214, 199, 0.15),
+          rgba(90, 167, 255, 0.15)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .img {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.18);
+        overflow: hidden;
+        aspect-ratio: 16 / 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      /* UTHM logo shown on every slide (top-right corner) */
+      .cornerLogo {
+        position: absolute;
+        top: calc(var(--pad) - 6px);
+        right: calc(var(--pad) - 6px);
+
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+
+        padding: 6px;
+        border-radius: 14px;
+
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+
+        pointer-events: none; /* doesn't block clicks/scroll */
+        user-select: none;
+        z-index: 5;
+      }
+
+      @media (max-width: 920px) {
+        .cornerLogo {
+          width: 52px;
+          height: 52px;
+          top: 12px;
+          right: 12px;
+        }
+      }
+
+      .img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .ph {
+        color: rgba(255, 255, 255, 0.65);
+        font-family: var(--mono);
+        font-size: 13px;
+        padding: 0 12px;
+        text-align: center;
+      }
+      .img::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          600px 260px at 30% 20%,
+          rgba(255, 255, 255, 0.1),
+          transparent 60%
+        );
+        mix-blend-mode: screen;
+        opacity: 0.8;
+      }
+
+      .members {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .member {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .avatar {
+        width: 62px;
+        height: 62px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Smaller logo box on the cover slide */
+      .logoBox {
+        aspect-ratio: 1 / 1;
+        max-width: 220px; /* adjust: 160–260px depending on your taste */
+        margin: 12px auto 0; /* center it in the card */
+      }
+
+      /* Prevent cropping for logos */
+      .logoBox img {
+        object-fit: contain;
+        padding: 12px;
+      }
+
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .mtext {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .mname {
+        font-weight: 800;
+        font-size: 15px;
+      }
+      .mmat {
+        color: var(--muted);
+        font-size: 13px;
+        font-family: var(--mono);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 14px;
+      }
+      th,
+      td {
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 14px;
+      }
+      th {
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        color: rgba(255, 255, 255, 0.86);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      /* Side nav dots */
+      .nav {
+        position: fixed;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 999px;
+        backdrop-filter: blur(10px);
+      }
+      .nav a {
+        width: 10px;
+        height: 10px;
+        border-radius: 99px;
+        display: block;
+        background: rgba(255, 255, 255, 0.28);
+        outline: none;
+      }
+      .nav a.active {
+        background: linear-gradient(180deg, var(--accent), var(--accent2));
+        box-shadow: 0 0 0 4px rgba(90, 167, 255, 0.12);
+      }
+
+      .bullets {
+        margin: 10px 0 0 0;
+        padding-left: 18px;
+        color: rgba(255, 255, 255, 0.86);
+      }
+      .highlight {
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 750;
+      }
+      .callout {
+        border-left: 4px solid rgba(54, 214, 199, 0.65);
+        padding: 10px 12px;
+        background: rgba(54, 214, 199, 0.08);
+        border-radius: 12px;
+        margin-top: 12px;
+        color: rgba(255, 255, 255, 0.86);
+      }
+      .pillrow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .pill {
+        padding: 8px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      /* Controls: Previous / Next / Download */
+      .controls {
+        position: fixed;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        z-index: 20;
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.25);
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 750;
+        font-size: 13px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.08s ease, background 0.15s ease,
+          border-color 0.15s ease, opacity 0.15s ease;
+        user-select: none;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn.primary {
+        background: linear-gradient(
+          135deg,
+          rgba(54, 214, 199, 0.18),
+          rgba(90, 167, 255, 0.18)
+        );
+        border-color: rgba(90, 167, 255, 0.22);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      /* Export overlay */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(6px);
+      }
+      .overlay .box {
+        width: min(520px, 92vw);
+        background: rgba(15, 20, 35, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
+      }
+      .progress {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        margin-top: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        transition: width 0.2s ease;
+      }
+
+      /* While capturing, hide nav & controls */
+      body.capturing .nav,
+      body.capturing .controls {
+        display: none !important;
+      }
+
+      @media (max-width: 920px) {
+        body {
+          overflow: auto;
+        }
+        .deck {
+          overflow-y: auto;
+        }
+        .content {
+          grid-template-columns: 1fr;
+        }
+        .members {
+          grid-template-columns: 1fr;
+        }
+        .nav {
+          display: none;
+        }
+        .controls {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Dot Navigation -->
+    <nav class="nav" aria-label="Slide navigation">
+      <a href="#s1" class="dotlink" aria-label="Slide 1"></a>
+      <a href="#s2" class="dotlink" aria-label="Slide 2"></a>
+      <a href="#s3" class="dotlink" aria-label="Slide 3"></a>
+      <a href="#s4" class="dotlink" aria-label="Slide 4"></a>
+      <a href="#s5" class="dotlink" aria-label="Slide 5"></a>
+      <a href="#s6" class="dotlink" aria-label="Slide 6"></a>
+      <a href="#s7" class="dotlink" aria-label="Slide 7"></a>
+      <a href="#s8" class="dotlink" aria-label="Slide 8"></a>
+      <a href="#s9" class="dotlink" aria-label="Slide 9"></a>
+    </nav>
+
+    <!-- Controls -->
+    <div class="controls" role="group" aria-label="Slide controls">
+      <button
+        class="btn"
+        id="prevBtn"
+        type="button"
+        title="Previous (↑ / PageUp)"
+      >
+        ← Previous
+      </button>
+      <button
+        class="btn"
+        id="nextBtn"
+        type="button"
+        title="Next (↓ / PageDown)"
+      >
+        Next →
+      </button>
+      <button
+        class="btn primary"
+        id="dlBtn"
+        type="button"
+        title="Download all slides as images"
+      >
+        ⬇ Download images
+      </button>
+    </div>
+
+    <!-- Export overlay -->
+    <div class="overlay" id="overlay" aria-live="polite" aria-busy="true">
+      <div class="box">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+          "
+        >
+          <div style="font-weight: 900">Exporting slides…</div>
+          <div
+            id="progText"
+            style="
+              color: rgba(255, 255, 255, 0.7);
+              font-family: var(--mono);
+              font-size: 12px;
+            "
+          >
+            0/0
+          </div>
+        </div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div
+          style="
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+          "
+        >
+          If your browser asks to allow multiple downloads, click <b>Allow</b>.
+        </div>
+      </div>
+    </div>
+
+    <main class="deck" id="deck">
+      <!-- Slide 1 -->
+      <section class="slide" id="s1" data-title="Cover">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <!-- LEFT SIDE: Logo & Course Info -->
+              <div style="text-align: center">
+                <div class="img logoBox" style="max-width: 160px; margin: 0 auto">
+                  <img
+                    src="/images/logo_1535792312.jpeg"
+                    alt="University logo"
+                    onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>uni-logo.png</div>';"
+                  />
+                </div>
+                
+                <div class="card" style="margin-top: 16px; text-align: center">
+                  <div class="badge" style="justify-content: center; width: 100%">
+                    FACULTY OF COMPUTER SCIENCE AND INFORMATION TECHNOLOGY
+                  </div>
+                  
+                  <div style="margin-top: 14px">
+                    <p style="color: var(--muted); font-size: 13px; margin: 0">Subject Code</p>
+                    <h3 style="margin: 4px 0 0 0; color: var(--accent)">BIC10003</h3>
+                    
+                    <p style="color: var(--muted); font-size: 13px; margin: 10px 0 0 0">Subject Name</p>
+                    <p style="margin: 4px 0 0 0; font-weight: 650">Fundamental Mathematics</p>
+                    
+                    <p style="color: var(--muted); font-size: 13px; margin: 10px 0 0 0">Lecturer</p>
+                    <p style="margin: 4px 0 0 0; font-weight: 650">Dr. Siti Hajar Binti Arbain</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <!-- RIGHT SIDE: Title, Group, & Members -->
+              <div class="kicker">
+                <span class="dot"></span> Final Project • BIC10003
+              </div>
+              <h1>
+                Statistical Analysis of Air Pollution Data
+                <span style="opacity: 0.9">(2018–2022)</span>
+              </h1>
+
+              <div class="pillrow">
+                <span class="pill"
+                  >Group: <span class="highlight">Group 2.1</span></span
+                >
+              </div>
+
+              <div class="callout">
+                <div style="font-weight: 800; margin-bottom: 6px">
+                  Team Members
+                </div>
+                <div class="members">
+                  <div class="member">
+                    <div class="avatar">
+                      <img
+                        src="images/jowel.jpg"
+                        alt="MD Jowel photo"
+                        onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>AI250004_MD_JOWEL.jpg</div>';"
+                      />
+                    </div>
+                    <div class="mtext">
+                      <div class="mname">MD JOWEL</div>
+                      <div class="mmat">AI250004</div>
+                    </div>
+                  </div>
+
+                  <div class="member">
+                    <div class="avatar">
+                      <img
+                        src="images/ahmed.jpg"
+                        alt="Ahmed Nashwan photo"
+                        onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>AI250001_AHMED_NASHWAN.jpg</div>';"
+                      />
+                    </div>
+                    <div class="mtext">
+                      <div class="mname">AHMED NASHWAN AHMED AL-MASWARY</div>
+                      <div class="mmat">AI250001</div>
+                    </div>
+                  </div>
+
+                  <div class="member">
+                    <div class="avatar">
+                      <img
+                        src="images/anas.jpg"
+                        alt="Anas Awsan photo"
+                        onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>AI250036_ANAS_AWSAN.jpg</div>';"
+                      />
+                    </div>
+                    <div class="mtext">
+                      <div class="mname">
+                        ANAS AWSAN ABDULRAZZAQ MUSAED SALLAM
+                      </div>
+                      <div class="mmat">AI250036</div>
+                    </div>
+                  </div>
+
+                  <div class="member">
+                    <div class="avatar">
+                      <img
+                        src="images//AI250032_ABDEREHMAN_IDRIS.jpg"
+                        alt="Abderehman Idris photo"
+                        onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>AI250032_ABDEREHMAN_IDRIS.jpg</div>';"
+                      />
+                    </div>
+                    <div class="mtext">
+                      <div class="mname">ABDEREHMAN IDRIS JEMAL</div>
+                      <div class="mmat">AI250032</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Air Pollution Analysis • Group Presentation</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2 -->
+      <section class="slide" id="s2" data-title="Objectives">
+        <div class="wrap onecol">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Overview</div>
+              <h2>What we analyzed & why it matters</h2>
+              <div class="callout">
+                <div style="font-weight: 800">Abstract (short)</div>
+                <p>
+                  Monthly air pollution readings from 2018–2022 were analyzed to
+                  describe overall levels, identify trends, and compare PM2.5
+                  between 2019 and 2020 using a two-sample t-test.
+                  Visualizations (trend lines, histograms, boxplots, and
+                  correlation heatmaps) supported the findings.
+                </p>
+              </div>
+              <div class="grid2" style="margin-top: 14px">
+                <div class="card">
+                  <h3>Goal</h3>
+                  <ul class="bullets">
+                    <li>
+                      Summarize pollutant levels (2018–2022) with descriptive
+                      statistics.
+                    </li>
+                    <li>Detect trends and variability across pollutants.</li>
+                    <li>
+                      Test whether <span class="highlight">PM2.5</span> changed
+                      significantly between 2019 and 2020.
+                    </li>
+                  </ul>
+                </div>
+                <div class="card">
+                  <h3>Key outputs</h3>
+                  <ul class="bullets">
+                    <li>Trend plots (PM2.5 over time)</li>
+                    <li>Histograms & boxplots (distribution & variability)</li>
+                    <li>
+                      Correlation heatmap (relationships among pollutants)
+                    </li>
+                    <li>Two-sample t-test (2019 vs 2020 PM2.5)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Overview & Objectives</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide" id="s3" data-title="Background">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Background</div>
+              <h2>Air pollution & Malaysia context</h2>
+              <div class="card" style="margin-top: 14px">
+                <h3>Why air quality monitoring matters</h3>
+                <ul class="bullets">
+                  <li>
+                    Air pollution can impact respiratory and cardiovascular
+                    health.
+                  </li>
+                  <li>
+                    Tracking pollutant levels supports better public health
+                    decisions.
+                  </li>
+                  <li>
+                    Malaysia faces challenges from urbanization, industry, and
+                    traffic emissions.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card" style="margin-top: 12px">
+                <h3>Focus pollutants</h3>
+                <ul class="bullets">
+                  <li>
+                    <span class="highlight">PM2.5 & PM10</span> (particulate
+                    matter: higher health risk due to inhalation)
+                  </li>
+                  <li>
+                    CO, NO₂, O₃, SO₂ (gaseous pollutants: typically more stable
+                    in this dataset)
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Visual placeholder</div>
+                <div class="img" style="margin-top: 12px">
+                  <img src="images/pm25_trend.png" alt="PM2.5 trend" />
+                </div>
+                <div class="meta" style="margin-top: 12px">
+                  <div><span class="highlight">Research questions</span></div>
+                  <div>• How do pollutant levels change over time?</div>
+                  <div>• Which pollutants show high variability/spikes?</div>
+                  <div>• Are pollutants correlated with each other?</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Background & Case Study</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide" id="s4" data-title="Data">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Data</div>
+              <h2>Dataset overview & cleaning</h2>
+
+              <div class="card" style="margin-top: 14px">
+                <h3>Dataset</h3>
+                <ul class="bullets">
+                  <li>
+                    Monthly readings from
+                    <span class="highlight">2018–2022</span> (Jan–Dec each year)
+                  </li>
+                  <li>
+                    Six pollutants:
+                    <span class="highlight">CO, NO₂, O₃, PM10, PM2.5, SO₂</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card" style="margin-top: 12px">
+                <h3>Cleaning method</h3>
+                <ul class="bullets">
+                  <li>
+                    Missing values filled using
+                    <span class="highlight">linear interpolation</span>.
+                  </li>
+                  <li>
+                    Creates smooth estimates between known neighboring data
+                    points.
+                  </li>
+                  <li>
+                    Avoids inserting arbitrary values that may bias results.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Trend plot placeholder</div>
+                <div class="img" style="margin-top: 12px">
+                  <img
+                    src="/images/pm25_histogram.png"
+                    alt="PM2.5 trend"
+                    onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>pm25_trend.png</div>';"
+                  />
+                </div>
+                <p style="margin-top: 10px; color: var(--muted)">histogram</p>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Dataset & Cleaning</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide" id="s5" data-title="Methods">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Method</div>
+              <h2>Tools, workflow, and scripts</h2>
+
+              <div class="grid2" style="margin-top: 14px">
+                <div class="card">
+                  <h3>Tools (Python)</h3>
+                  <ul class="bullets">
+                    <li>
+                      <span class="highlight">Pandas</span> — data handling &
+                      cleaning
+                    </li>
+                    <li>
+                      <span class="highlight">Matplotlib / Seaborn</span> —
+                      visualization
+                    </li>
+                    <li>
+                      <span class="highlight">SciPy</span> — hypothesis testing
+                      (t-test)
+                    </li>
+                  </ul>
+                </div>
+                <div class="card">
+                  <h3>Scripts</h3>
+                  <ul class="bullets">
+                    <li>
+                      <span class="highlight">analysis.py</span> — descriptive
+                      stats + t-test
+                    </li>
+                    <li>
+                      <span class="highlight">visualization.py</span> — graphs
+                      saved to <span class="highlight">graphs/</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="callout">
+                <div style="font-weight: 800">Tip</div>
+                <div style="color: rgba(255, 255, 255, 0.86)">
+                  Put a screenshot of your code on the right if your lecturer
+                  requires it.
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Code screenshot placeholder</div>
+                <div class="img" style="margin-top: 12px">
+                  <div class="ph">
+                    <img
+                      src="/images/Screenshot from 2025-12-19 11-19-58.png"
+                      alt=""
+                    />
+                    Add screenshot here (filename: <b>code_snippet.png</b>)
+                  </div>
+                </div>
+                <div class="meta" style="margin-top: 12px">
+                  <div><span class="highlight">Workflow</span></div>
+                  <div>
+                    1) Load & clean → 2) Describe → 3) Test → 4) Visualize → 5)
+                    Interpret
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Programming & Method Development</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide" id="s6" data-title="Descriptive">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Results</div>
+              <h2>Descriptive statistics (2018–2022)</h2>
+              <div class="card" style="margin-top: 14px">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Pollutant</th>
+                      <th>Mean</th>
+                      <th>Median</th>
+                      <th>Mode</th>
+                      <th>Std Dev</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>CO</td>
+                      <td>0.582</td>
+                      <td>0.563</td>
+                      <td>0.515</td>
+                      <td>0.072</td>
+                    </tr>
+                    <tr>
+                      <td>NO₂</td>
+                      <td>0.0065</td>
+                      <td>0.0065</td>
+                      <td>0.0074</td>
+                      <td>0.0010</td>
+                    </tr>
+                    <tr>
+                      <td>O₃</td>
+                      <td>0.0168</td>
+                      <td>0.0160</td>
+                      <td>0.0160</td>
+                      <td>0.0026</td>
+                    </tr>
+                    <tr>
+                      <td>PM10</td>
+                      <td>22.81</td>
+                      <td>21.27</td>
+                      <td>18.55</td>
+                      <td>7.17</td>
+                    </tr>
+                    <tr>
+                      <td>PM2.5</td>
+                      <td>14.85</td>
+                      <td>13.27</td>
+                      <td>11.43</td>
+                      <td>6.33</td>
+                    </tr>
+                    <tr>
+                      <td>SO₂</td>
+                      <td>0.0011</td>
+                      <td>0.0011</td>
+                      <td>0.0011</td>
+                      <td>0.0001</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="callout">
+                <span class="highlight">Interpretation:</span>
+                CO, NO₂, O₃, and SO₂ appear more stable, while PM10 and PM2.5
+                show higher variability and occasional spikes.
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Histogram placeholder</div>
+                <div class="img" style="margin-top: 12px">
+                  <img
+                    src="images/pollutants_boxplot.png"
+                    alt="PM2.5 histogram"
+                    onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>pm25_histogram.png</div>';"
+                  />
+                </div>
+                <p style="margin-top: 10px; color: var(--muted)">
+                  Shows PM2.5 distribution across the full dataset.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Descriptive Statistics</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide" id="s7" data-title="T-Test">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Inference</div>
+              <h2>Hypothesis test: PM2.5 (2019 vs 2020)</h2>
+
+              <div class="card" style="margin-top: 14px">
+                <h3>Two-sample t-test</h3>
+                <ul class="bullets">
+                  <li>
+                    <span class="highlight">H₀:</span> Mean PM2.5 (2019) = Mean
+                    PM2.5 (2020)
+                  </li>
+                  <li>
+                    <span class="highlight">H₁:</span> Mean PM2.5 (2019) ≠ Mean
+                    PM2.5 (2020)
+                  </li>
+                </ul>
+              </div>
+
+              <div class="grid2" style="margin-top: 12px">
+                <div class="card">
+                  <h3>Result (fill from your output)</h3>
+                  <p style="margin-top: 8px; font-family: var(--mono)">
+                    T-statistic = <span class="highlight">[Insert Value]</span
+                    ><br />
+                    P-value = <span class="highlight">[Insert Value]</span>
+                  </p>
+                </div>
+                <div class="card">
+                  <h3>Interpretation</h3>
+                  <p style="margin-top: 8px">
+                    If <span class="highlight">p-value &lt; 0.05</span>, reject
+                    H₀ → PM2.5 differs significantly between 2019 and 2020
+                    (commonly linked to reduced activity during lockdown
+                    periods).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Year comparison chart</div>
+                <div class="img" style="margin-top: 12px">
+                  <img
+                    src="images/pollutants_boxplot.png"
+                    alt="Pollutants boxplot"
+                    onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>pollutants_boxplot.png</div>';"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Hypothesis Testing & Visual Support</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide" id="s8" data-title="Conclusion">
+        <div class="wrap">
+          <div class="topbar"></div>
+          <div class="content">
+            <div>
+              <div class="kicker"><span class="dot"></span> Wrap-up</div>
+              <h2>Discussion, conclusion & recommendations</h2>
+
+              <div class="card" style="margin-top: 14px">
+                <h3>Main conclusions</h3>
+                <ul class="bullets">
+                  <li>
+                    Gaseous pollutants (CO, NO₂, O₃, SO₂) remained relatively
+                    stable.
+                  </li>
+                  <li>
+                    Particulate matter (<span class="highlight"
+                      >PM10, PM2.5</span
+                    >) showed higher variability and spikes.
+                  </li>
+                  <li>
+                    PM2.5 appears lower in 2020 compared to 2019 (confirm with
+                    your t-test values).
+                  </li>
+                </ul>
+              </div>
+
+              <div class="grid2" style="margin-top: 12px">
+                <div class="card">
+                  <h3>Recommendations</h3>
+                  <ul class="bullets">
+                    <li>
+                      Focus policy efforts on reducing PM emissions (largest
+                      health risk).
+                    </li>
+                    <li>
+                      Continue monitoring and periodic statistical reporting.
+                    </li>
+                    <li>Use findings to support public health awareness.</li>
+                  </ul>
+                </div>
+                <div class="card">
+                  <h3>Limitations & future work</h3>
+                  <ul class="bullets">
+                    <li>Monthly averages only (may hide short-term peaks).</li>
+                    <li>Single dataset / limited geography.</li>
+                    <li>Future: real-time monitoring + multiple locations.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card twoTone">
+                <div class="badge">Correlation heatmap</div>
+                <div
+                  class="img"
+                  style="margin-top: 12px; aspect-ratio: 16 / 11"
+                >
+                  <img
+                    src="images/pollutants_heatmap.png"
+                    alt="Pollutants correlation heatmap"
+                    onerror="this.remove(); this.parentElement.innerHTML='<div class=&quot;ph&quot;>pollutants_heatmap.png</div>';"
+                  />
+                </div>
+                <p style="margin-top: 10px; color: var(--muted)">
+                  explain key correlations
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Conclusion & Next Steps</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: Thank You -->
+      <section class="slide" id="s9" data-title="Thank You">
+        <div class="wrap onecol">
+          <div class="topbar"></div>
+          <div class="content">
+            <div style="text-align: center; padding: 10px 0">
+              <div class="kicker" style="justify-content: center">
+                <span class="dot"></span> End
+              </div>
+              <h1 style="margin-top: 10px">Thank You</h1>
+              <p style="margin-top: 10px; color: rgba(255, 255, 255, 0.78)">
+                Questions & Discussion
+              </p>
+
+              <div
+                class="card twoTone"
+                style="margin-top: 18px; text-align: left"
+              >
+                <div class="badge">Team</div>
+                <div class="members" style="margin-top: 12px">
+                  <div class="member">
+                    <div class="mtext">
+                      <div class="mname">MD JOWEL</div>
+                      <div class="mmat">AI250004</div>
+                    </div>
+                  </div>
+                  <div class="member">
+                    <div class="mtext">
+                      <div class="mname">AHMED NASHWAN AHMED AL-MASWARY</div>
+                      <div class="mmat">AI250001</div>
+                    </div>
+                  </div>
+                  <div class="member">
+                    <div class="mtext">
+                      <div class="mname">
+                        ANAS AWSAN ABDULRAZZAQ MUSAED SALLAM
+                      </div>
+                      <div class="mmat">AI250036</div>
+                    </div>
+                  </div>
+                  <div class="member">
+                    <div class="mtext">
+                      <div class="mname">ABDEREHMAN IDRIS JEMAL</div>
+                      <div class="mmat">AI250032</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="foot-left"></span>
+            <span>Thank You</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- html2canvas for exporting slides to images -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <script>
+      const deck = document.getElementById("deck");
+      const slides = [...document.querySelectorAll(".slide")];
+      // ✅ Change this to your real logo path if needed
+      const UTHM_LOGO_SRC = "/images/logo_1535792312.jpeg";
+
+      function injectUTHMCornerLogo() {
+        slides.forEach((slide) => {
+          if (slide.querySelector(".cornerLogo")) return; // avoid duplicates
+
+          const img = document.createElement("img");
+          img.src = UTHM_LOGO_SRC;
+          img.alt = "UTHM logo";
+          img.className = "cornerLogo";
+          img.loading = "eager";
+          img.decoding = "async";
+
+          slide.appendChild(img);
+        });
+      }
+
+      // Run once on load
+      injectUTHMCornerLogo();
+
+      const dots = [...document.querySelectorAll(".dotlink")];
+
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const dlBtn = document.getElementById("dlBtn");
+
+      const overlay = document.getElementById("overlay");
+      const progText = document.getElementById("progText");
+      const bar = document.getElementById("bar");
+
+      function currentSlideIndex() {
+        const top = deck.scrollTop;
+        let best = 0,
+          bestDist = Infinity;
+        slides.forEach((s, i) => {
+          const dist = Math.abs(s.offsetTop - top);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        });
+        return best;
+      }
+
+      function goTo(i) {
+        i = Math.max(0, Math.min(slides.length - 1, i));
+        deck.scrollTo({ top: slides[i].offsetTop, behavior: "smooth" });
+        updateUI(i);
+      }
+
+      function setActiveDot(i) {
+        dots.forEach((d) => d.classList.remove("active"));
+        if (dots[i]) dots[i].classList.add("active");
+      }
+
+      function updateFooters() {
+        slides.forEach((s, idx) => {
+          const foot = s.querySelector(".foot-left");
+          if (foot) foot.textContent = `Slide ${idx + 1}/${slides.length}`;
+        });
+      }
+
+      function updateUI(i) {
+        setActiveDot(i);
+        prevBtn.disabled = i === 0;
+        nextBtn.disabled = i === slides.length - 1;
+      }
+
+      deck.addEventListener(
+        "scroll",
+        () => {
+          updateUI(currentSlideIndex());
+        },
+        { passive: true }
+      );
+
+      prevBtn.addEventListener("click", () => goTo(currentSlideIndex() - 1));
+      nextBtn.addEventListener("click", () => goTo(currentSlideIndex() + 1));
+
+      document.addEventListener("keydown", (e) => {
+        const i = currentSlideIndex();
+        if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+          e.preventDefault();
+          goTo(i + 1);
+        }
+        if (["ArrowUp", "PageUp"].includes(e.key)) {
+          e.preventDefault();
+          goTo(i - 1);
+        }
+        if (e.key === "Home") {
+          e.preventDefault();
+          goTo(0);
+        }
+        if (e.key === "End") {
+          e.preventDefault();
+          goTo(slides.length - 1);
+        }
+      });
+
+      // Export slides as PNG images (one per slide)
+      async function downloadAllSlidesAsImages() {
+        if (typeof html2canvas === "undefined") {
+          alert(
+            "Export library failed to load. Check your internet connection."
+          );
+          return;
+        }
+
+        // Helpful: some browsers block multiple downloads unless the user allows it
+        // Make sure you click "Allow" when prompted.
+
+        document.body.classList.add("capturing");
+        overlay.style.display = "flex";
+        bar.style.width = "0%";
+        progText.textContent = `0/${slides.length}`;
+
+        // Turn off smooth scroll temporarily (more reliable for export)
+        const oldScrollBehavior = deck.style.scrollBehavior;
+        deck.style.scrollBehavior = "auto";
+
+        // Save the user's current scroll position
+        const originalTop = deck.scrollTop;
+
+        // Give layout time
+        await new Promise((r) => setTimeout(r, 200));
+
+        for (let i = 0; i < slides.length; i++) {
+          progText.textContent = `${i + 1}/${slides.length}`;
+          bar.style.width = `${Math.round(((i + 1) / slides.length) * 100)}%`;
+
+          // IMPORTANT: scroll deck to this slide so it's fully rendered/visible
+          deck.scrollTop = slides[i].offsetTop;
+
+          // Wait for images/fonts/layout to settle
+          await new Promise((r) => setTimeout(r, 500));
+
+          // Render each slide
+          const canvas = await html2canvas(slides[i], {
+            scale: 2,
+            backgroundColor: null,
+            useCORS: true,
+            allowTaint: true, // ✅ helps with local images
+            imageTimeout: 15000, // ✅ wait for images
+            logging: false,
+          });
+
+          // Download
+          const a = document.createElement("a");
+          const n = String(i + 1).padStart(2, "0");
+          a.download = `slide-${n}.png`;
+          a.href = canvas.toDataURL("image/png");
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+
+          await new Promise((r) => setTimeout(r, 300));
+        }
+
+        // Restore scroll position + behavior
+        deck.scrollTop = originalTop;
+        deck.style.scrollBehavior = oldScrollBehavior || "";
+
+        overlay.style.display = "none";
+        document.body.classList.remove("capturing");
+      }
+      // ✅ Connect the button
+      dlBtn.addEventListener("click", downloadAllSlidesAsImages);
+
+      // ✅ Init footer + active dot
+      updateFooters();
+      updateUI(0);
+      setActiveDot(0);
+    </script>
+  </body>
+</html>
